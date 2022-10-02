@@ -13,7 +13,7 @@ using std::ostream;
 class Mod
 {
 public:
-    Mod(long t)
+    Mod(long long t)
     {
         x = t % modulus;
 
@@ -36,13 +36,13 @@ public:
     Mod &operator=(const Mod &m)
     {
         // this->x = m.x;
-        x = m.x;
+        x = m.x; // x = m.val();
 
         return *this; 
     };
     Mod &operator-=(const Mod &m)
     {
-        x -= m.x;
+        x -= m.x; // x -= m.val();
         if (x < 0)
         {
             x += modulus;
@@ -58,9 +58,6 @@ public:
 
     Mod &operator+=(const Mod &m)
     {
-        // Mod temp(m);
-        // x -= -m.x
-        // overflow occurs when x = m.x = 2^31 - 1,
         *this -= (-m);
         return *this;
     };
@@ -70,8 +67,6 @@ public:
         Mod res(0);
         Mod b_n(m);
         Mod a_n(*this);
-        // unsigned long b_n = b.val();
-        // unsigned long a_n = a.val();
 
         while (b_n.val() > 0)
         {
@@ -90,53 +85,54 @@ public:
     };
 
     Mod &operator/=(const Mod &m) {
-        if (m.val() == 0) {
-            exit(-1);
-        }
-        x /= m.x;
-        Mod temp(x);
-        *this = temp;
+        *this *= inv(m.val());
         return *this;
     };
 
-    Mod pwr(long e) const
+    Mod pwr(long long e) const
     {
         Mod res(1);
-        Mod exp(e);
         Mod a_n(*this);
 
-        while (exp.val() > 0)
+        // if (e == 0) { // no need since while loop is bypassed if e == 0
+            // return res; 
+        // }
+
+        if (e < 0) {
+            return inv(a_n.val()).pwr(-e);
+        }
+
+        while (e > 0)
         {
-            if (exp.val() % 2 == 1)
+            if (e % 2 == 1)
             {
                 res *= (a_n);
+                e -= 1; // not required since e/2 below drops decimal
             }
 
             a_n *= (a_n);
-            exp = exp.val() / 2;
+            e = e/2;
         }
 
         return res;
     };
 
-    long val() const
+    long long val() const
     {
         return x;
     };
 
-    static void set_modulus(long m)
+    static void set_modulus(long long m)
     {
-        if (m < 2) {
-            exit(-1);
-        }
         modulus = m;
     };
-    static long get_modulus() { return modulus; }
+    static long long get_modulus() { return modulus; }
 
 private:
-    long x;
-    static long modulus;
-    static long extended_euclidean(long a, long b, Mod *sol, Mod *y)
+    long long x;
+    static long long modulus;
+
+    static long long extended_euclidean(long long a, long long b, Mod *sol, Mod *y)
     {   
         // Base Case
         if (a == 0)
@@ -147,9 +143,8 @@ private:
         }
 
         // Store results of recursive call
-        long gcd = extended_euclidean(b % a, a, sol, y);
-        // Update x and y using results of
-        // recursive call
+        long long gcd = extended_euclidean(b % a, a, sol, y);
+        // Update using results of recursive call
         // *sol = y1 - (b / a) * sol1;
         Mod temp = *sol;
         *sol *= Mod(- (b / a));
@@ -158,17 +153,13 @@ private:
         *y = temp;
 
         return gcd;
-        // **Use euclidean algorithm if runtime matters, if not bashing is safer
+        // Use euclidean algorithm if runtime matters, if not bashing is safer
     }
 
-    // find k such that k * r0 = 1 (mod modulus)
-    static Mod inv(long r0){
-        if (r0 == 0) {
-            exit(-1);
-        }
+    static Mod inv(long long r0){
         Mod k(0);
         Mod temp(0);
-        long gcd = extended_euclidean(r0, modulus, &k, &temp);
+        long long gcd = extended_euclidean(r0, modulus, &k, &temp);
 
         if (gcd == 1) {
             return Mod(k);
@@ -185,10 +176,10 @@ Mod operator-(const Mod &a, const Mod &b)
     return temp;
 };
 
-Mod operator-(long t, const Mod &m)
+Mod operator-(long long t, const Mod &m)
 {
     Mod temp(t);
-    return temp - m; // subtraction between mod objects alr defined
+    return temp - m; // already defined subtraction between mod objects
 };
 
 Mod operator+(const Mod &a, const Mod &b)
@@ -196,7 +187,7 @@ Mod operator+(const Mod &a, const Mod &b)
     Mod negative(-b.val());
     return a - negative;
 };
-Mod operator+(long t, const Mod &m)
+Mod operator+(long long t, const Mod &m)
 {
     Mod temp(t);
     return temp + m;
@@ -207,8 +198,6 @@ Mod operator*(const Mod &a, const Mod &b)
     Mod res(0);
     Mod b_n(b);
     Mod a_n(a);
-    // unsigned long b_n = b.val();
-    // unsigned long a_n = a.val();
 
     while (b_n.val() > 0)
     {
@@ -223,11 +212,9 @@ Mod operator*(const Mod &a, const Mod &b)
     }
 
     return res;
-    // Mod temp(a.val() * b.val());
-    // return temp;
 };
 
-Mod operator*(long t, const Mod &m)
+Mod operator*(long long t, const Mod &m)
 {
     Mod temp(t);
     return temp * m;
@@ -235,17 +222,12 @@ Mod operator*(long t, const Mod &m)
 
 Mod operator/(const Mod &a, const Mod &b)
 {
-    if (b.val() == 0) {
-            exit(-1);
-    }
-    Mod temp(a.val() / b.val());
+    Mod temp(a.val());
+    temp /= b;
     return temp;
 };
-Mod operator/(long t, const Mod &m)
+Mod operator/(long long t, const Mod &m)
 {
-    if (m.val() == 0) {
-        exit(-1);
-    }
     Mod temp(t);
     return temp / m;
 };
@@ -254,7 +236,7 @@ bool operator==(const Mod &a, const Mod &b)
     return a.val() == b.val();
 };
 
-bool operator==(long t, const Mod &m)
+bool operator==(long long t, const Mod &m)
 {
     Mod temp(t);
     return temp == m;
@@ -263,25 +245,25 @@ bool operator!=(const Mod &a, const Mod &b)
 {
     return a.val() != b.val();
 };
-bool operator!=(long t, const Mod &m)
+bool operator!=(long long t, const Mod &m)
 {
     Mod temp(t);
     return temp != m;
 };
 
 istream &operator>>(istream &is, Mod &m) {
-    long a;
+    long long a;
     is >> a;
-    m = a;
+    m = Mod(a);
     return is;
 }; 
 
 ostream &operator<<(ostream &os, const Mod &m)
 {
-    os << m.val() << " (mod " << Mod::get_modulus() << ")";
+    os << m.val() << " (mod " << Mod::get_modulus() << ")" << endl;
     return os;
 };
 
-// long Mod::modulus = 1000000000 - 1; // for test
+long long Mod::modulus = 1000000000 - 1;
 
 #endif /* defined(____Mod__) */
