@@ -5,5 +5,5 @@ This course is taught by Dr. John Nevard.
 
 The course begins with an overview of c++ syntex and review, then dives into traditional college-styled Data Structures course involving data structures and algorithms. 
 
-Labs involve o
+Labs involve overloading various operators and constructing structures & implementing algorithms.
 
