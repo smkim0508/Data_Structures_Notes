@@ -1,10 +1,10 @@
 #include <iostream>
-
-using namespace std;
+unsigned long long int catalan(int n);
 
 struct Node
 {
-    Node(Node *l = nullptr, Node *r = nullptr) : l(l), r(r) {}
+    Node(Node *l = nullptr, Node *r = nullptr) : l(l), r(r) {
+    }
 
     ~Node()
     {
@@ -14,17 +14,20 @@ struct Node
 
     Node *l;
     Node *r;
+    static bool catalanComputed;
 };
 
-// printing method to visualize tree
-void printBT(const string &prefix, const Node *node, bool isLeft) {
-    if (node != nullptr) {
-        cout << prefix;
+bool Node::catalanComputed = false;
 
-        cout << (isLeft ? "l--" : "r--");
+// printing method to visualize tree
+void printBT(const std::string &prefix, const Node *node, bool isLeft) {
+    if (node != nullptr) {
+        std::cout << prefix;
+
+        std::cout << (isLeft ? "l--" : "r--");
 
         // print the value of the node
-        cout << "#" << endl;
+        std::cout << "#" << std::endl;
 
         // enter the next tree level - left and right branch
         printBT(prefix + (isLeft ? ".  " : "   "), node->l, true);
@@ -36,7 +39,7 @@ void printBT(const Node *node) { printBT("", node, false); }
 
 //C_n = for i=0;i<n;i++ {save += C_i*C_(n-1-i)}
 
-int sum = 0;
+// int sum = 0;
 
 unsigned long long int memo[37]; 
 // assume 0 <= n < 37
@@ -53,6 +56,12 @@ unsigned long long int catalan(int n) {
 }
 
 Node *tree(int sz, unsigned long long idx) {
+    // compute all catalan numbers if not computed yet
+    if(!Node::catalanComputed) {
+        catalan(36);
+        Node::catalanComputed = true;
+    }
+
     // base case
     if(sz == 0) {
         return nullptr;
@@ -95,9 +104,15 @@ unsigned long size(const Node *root) {
 }
 
 unsigned long long index(const Node *root) {
+    // compute all catalan numbers if not computed yet
+    if(!Node::catalanComputed) {
+        catalan(36);
+        Node::catalanComputed = true;
+    }
+    
     unsigned long sz = size(root);
     if (sz == 0 || sz == 1) {
-        // cout << "test 0 or 1" << endl;
+        // std::cout << "test 0 or 1" << std::endl;
         return 0;
     }
 
@@ -105,35 +120,12 @@ unsigned long long index(const Node *root) {
     unsigned long right_sz = size(root->r);
     
     unsigned long long counter = 0;
-    // cout << "test 2" << endl;
+    // std::cout << "test 2" << std::endl;
     for (int i=0;i<left_sz;i++) {
-        // cout << "test loop " << i << endl;
+        // std::cout << "test loop " << i << std::endl;
         counter += memo[i]*memo[sz-1-i];
     }
 
     return counter + (index(root->l) * memo[right_sz] + index(root->r));
     
 };
-
-// test output
-int main() {
-    catalan(36); // compute all catalan numbers and save to memo[]
-    //    #
-    //  #   # 
-    Node root;
-    Node left_node;
-    Node right_node;
-
-    root.l = &left_node;
-    root.r = &right_node;
-
-    int sz = 36;
-    cout << sizeof(long long int) << endl;  
-    cout << index(tree(sz, 11959798385860453491)) << endl; // largest possible index output
-    cout << memo[36] << endl;
-    
-    // for (int i = 0; i < memo[sz]; i++) {
-    //     cout << index(tree(sz, i)) << endl;
-    // }
-    // printBT(&root);
-}
