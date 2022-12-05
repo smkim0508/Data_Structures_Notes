@@ -14,8 +14,8 @@ int findMax(int arr[], int n)
 
 void countingSort(int main_arr[], int correspond[], int n, int exp)
 {
-	int sorted[n]; // the new array that will be the sorted output of the main array
-    int map[n]; // the array that is mapped corresponding to the sort
+	int* sorted = new int[n]; // the new array that will be the sorted output of the main array
+    int* map = new int[n]; // the array that is mapped corresponding to the sort
 	int i, count[10] = { 0 };
 
 	for (i = 0; i < n; i++) {
@@ -222,7 +222,6 @@ int power(int hand) {
     else return cards[0]/4 * 13 * 13 * 13 * 13 + cards[1]/4 * 13 * 13 * 13 + cards[2]/4 * 13 * 13 + cards[3]/4 * 13 + cards[4]/4;   
 
 }
-
 
 void poker_sort(std::vector<int>& a) {
     
